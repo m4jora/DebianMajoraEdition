@@ -1,5 +1,5 @@
 Debian Majora
-Ver. 2021.08.17-1
+Ver. 2021.08.17-4
 
 With this script, you take Debian Buster and make it Majora-ized.
 
