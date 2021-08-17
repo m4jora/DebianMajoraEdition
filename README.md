@@ -1,3 +1,7 @@
+====
+YOU MUST RUN install.sh FIRST!
+====
+
 Debian Majora
 Ver. 2021.08.17-4
 
