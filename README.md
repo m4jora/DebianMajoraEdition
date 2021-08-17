@@ -1,12 +1,10 @@
-# DebianMajoraEdition
-A custom setup for an uncustomary user.
-
 Debian Majora
 Ver. 2021.08.17-1
 
 With this script, you take Debian Buster and make it Majora-ized.
 
 What this entails:
+
 -> Over 900 Pen-Testing Tools via Kali Linux
 --> Kali Tools repository added for timely updates
 
