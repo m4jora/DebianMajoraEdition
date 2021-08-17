@@ -1,6 +1,8 @@
 Debian Majora
 Ver. 2021.08.17-4
 
+Automated! You can download just the "debian-majora-edition*.tar.gz, extract it and run install.sh :)
+
 With this script, you take Debian Buster and make it Majora-ized.
 
 What this entails:
