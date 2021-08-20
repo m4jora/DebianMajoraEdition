@@ -5,7 +5,7 @@ YOU MUST RUN install.sh FIRST!
 Debian Majora
 Ver. 2021.08.17-4
 
-Automated! You can download just the "debian-majora-edition*.tar.gz, extract it and run install.sh :)
+Automated! You can extract [dme21i.tar.gz] and run install.sh.
 
 With this script, you take Debian Buster and make it Majora-ized.
 
@@ -50,8 +50,8 @@ What this entails:
 Script Descriptions (You MUST run install.sh 1st!):
 
 install.sh:
-1) Moves tar package to current user's home directory (~).
-2) Unpacks tar.
+1) Moves tar package to temporary directory.
+2) Unpacks swinst.sh
 3) Offers to run swinst.sh
 
 swinst.sh:
