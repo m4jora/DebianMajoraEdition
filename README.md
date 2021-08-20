@@ -1,4 +1,3 @@
-===
 This script is to be run immediately after installing Debian 11.0
 ===
 Complete installer:dme21i.tar.gz
