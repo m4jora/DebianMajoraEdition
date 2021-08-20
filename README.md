@@ -1,15 +1,15 @@
-====
-YOU MUST RUN install.sh FIRST!
-====
-All you need is dme21i.tar.gz
-====
+===
+This script is to be run immediately after installing Debian 11.0
+===
+Complete installer:dme21i.tar.gz
+===
 
 Debian Majora
 Ver. 2021.08.17-4
 
 Automated! You can extract [dme21i.tar.gz] and run install.sh.
 
-With this script, you take Debian Buster and make it Majora-ized.
+With this script, you take Debian Bullseye and make it Majora-ized.
 
 What this entails:
 
