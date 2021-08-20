@@ -1,6 +1,8 @@
 ====
 YOU MUST RUN install.sh FIRST!
 ====
+All you need is dme21i.tar.gz
+====
 
 Debian Majora
 Ver. 2021.08.17-4
