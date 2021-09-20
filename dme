@@ -1,0 +1,417 @@
+#!/bin/bash
+
+#
+#
+## DEBIAN MAJORA EDITION v0.7 ##
+#
+#
+# 
+
+## Installs all the stuff Majora needs to be a content hermit. ##
+## This should be run after a new install of Debian 11 is installed ##
+#
+## What does it do? ##
+#
+## 1) Corrects sources.list to include all bookworm and bulleye repos along with bullseye backports.
+## 2) Upgrades to bookworm.
+## 3) Installs custom extras [line 135], fonts.
+## 4) Installs Steam, NVidia drivers and tools, fixes steam error 117.
+## 5) Installs ProtonVPN, VMware Player and PeaZip.
+# 
+ 
+
+#root
+if [ $EUID != 0 ];
+then
+sudo "$0" "$@"
+exit $?
+fi
+
+#declare vars
+declare a b c d e f g j fnt src vmw
+declare c="clear"
+declare f="/etc/apt/sources.list"
+declare r="read -p ..."
+declare x="printf"
+
+#isolate
+mkdir run
+cd run
+
+#steam
+#declare vars (recurring strings)
+declare x="printf" p="/etc/os-release"
+
+#declare [y/n] vars, default "n"
+declare a="n" b="n" c="n" d="n" e="n" f="n" g="n"
+
+######################
+#update sources.list
+######################
+
+$x "#debian11" > $f
+$x "%s\ndeb http://deb.debian.org/debian bullseye main non-free contrib" >> $f
+$x "%s\n" >> $f
+$x "%s\n#debian12" >> $f
+$x "%s\ndeb http://deb.debian.org/debian bookworm main non-free contrib" >> $f
+$x "%s\n" >> $f
+$x "%s\n#debian11 sec" >> $f
+$x "%s\ndeb http://security.debian.org/debian-security bullseye-security main contrib non-free" >> $f
+$x "%s\n" >> $f
+$x "%s\n#debian12 sec" >> $f
+$x "%s\ndeb http://security.debian.org/debian-security bookworm-security main non-free contrib" >> $f
+$x "%s\n" >> $f
+$x "%s\n#debian11 updates" >> $f
+$x "%s\ndeb http://deb.debian.org/debian bullseye-updates main contrib non-free" >> $f
+$x "%s\n" >> $f
+$x "%s\n#debian12 updates" >> $f
+$x "%s\ndeb http://deb.debian.org/debian bookworm-updates main contrib non-fre"e >> $f
+$x "%s\n" >> $f
+$x "%s\n#debian11 source"
+$x "%s\ndeb-src http://deb.debian.org/debian bullseye main non-free contrib" >> $f
+$x "%s\n" >> $f
+$x "%s\n#debian12 source" >> $f
+$x "%s\ndeb-src http://deb.debian.org/debian bookworm main non-free contrib" >> $f
+$x "%s\n" >> $f
+$x "%s\n#debian11 sec source" >> $f
+$x "%s\ndeb-src http://security.debian.org/debian-security bullseye-security main contrib non-free" >> $f
+$x "%s\n" >> $f
+$x "%s\n#debian12 security source" >> $f
+$x "%s\ndeb-src http://security.debian.org/debian-security bookworm-security main non-free contrib" >> $f
+$x "%s\n" >> $f
+$x "%s\n#debian11 updates source" >> $f
+$x "%s\ndeb-src http://deb.debian.org/debian bullseye-updates main contrib non-free" >> $f
+$x "%s\n" >> $f
+$x "%s\n#debian12 updates source" >> $f
+$x "%s\ndeb-src http://deb.debian.org/debian bookworm-updates main non-free contrib" >> $f
+$x "%s\n" >> $f
+$x "%s\n#debian11 backports" >> $f
+$x "%s\ndeb http://deb.debian.org/debian bullseye-backports main contrib non-free" >> $f
+
+
+################
+#functions
+################
+
+
+#option to exit
+function leev () {
+$c
+j="n"
+read -p "Exit [y/n]:" j
+if [ $j = "y" ];
+then
+exit
+fi
+}
+
+#update/upgrade
+function upz () {
+apt update -y
+apt upgrade -y
+$r
+}
+
+
+############
+#installs
+############
+
+
+#updates first run
+upz
+
+#upgrade os if avail
+$c
+apt dist-upgrade -y
+$r
+
+$c
+read -p "Majora Customization [y/n]:" a
+if [ $a == "y" ];
+then
+upz
+$c
+apt install mixxx kdevelop synaptic rhythmbox brasero gimp ktorrent gwenview ristretto kolourpaint macchanger terminator kate dolphin dolphin-plugins libpam-yubico libyubikey0 python-yubico-tools python3-yubico python3-yubikey-manager yubico-piv-tool yubikey-luks yubikey-manager yubikey-personalization-gui yubikey-personalization yubioath-desktop python3-ykman libykpiv2 libykclient3 fityk libykpers-1-1 kshutdown muon shotwell bleachbit gparted audacity flowblade openshot shotcut vlc android-sdk edac-utils curl gpart grsync -y
+$r
+$c
+fi
+leev
+
+$c
+read -p "Fonts [y/n]:" fnt
+if [ $fnt == "y" ];
+then
+upz
+apt install $(apt list | grep '^fonts' | sed 's/\/.*//' | sed ':a;N;$!ba;s/\n/ /g') -y
+$r
+$c
+apt install $(apt list | grep 'font' | grep -v '^fonts\|^xfonts\|dvi\|fontforge\|python\|r-cran\|^lib\|i386\|scalable-cyrfonts-tex' | sed 's/\/.*//' | sed ':a;N;$!ba;s/\n/ /g') -y
+$r
+$c
+fi
+leev
+
+
+
+#####################
+#STEAM MONSTROSITY
+#####################
+
+
+
+#######################
+#VERSION_ID ERROR FIX
+#######################
+
+
+function oneoneseven () {
+$c
+#update user 
+$x "%sThis script will edit /etc/os-release to correct the following error:\n"
+$x "\'/home/$USER/.local/share/Steam/steam.sh: line 117: VERSION_ID: unbound variable\'\n"
+$x "WARNING: Only use this if you're using Debian12 aka bookworm.\n\n"
+read -p "Correct this error? [y/n]:" e
+if [ $e == "y" ];
+then
+#copy first six lines of /etc/os-release
+#add VERSION_ID on a new line
+#print to stdout as well
+$x "%sPRETTY_NAME=\"Debian GNU/Linux bookworm/sid\"\n" | tee $p
+$x "%sNAME=\"Debian GNU/Linux\"\n" | tee -a $p
+$x "%sID=debian\n" | tee -a $p
+$x "%sHOME_URL=\"https://www.debian.org/\"\n" | tee -a $p
+$x "%sSUPPORT_URL=\"https://www.debian.org/support\"\n" | tee -a $p
+$x "%sBUG_REPORT_URL=\"https://bugs.debian.org/\"\n" | tee -a $p
+$x "%sVERSION_ID=\"bookworm\"" | tee -a $p
+$x "%s\n\n"
+fi
+#done!
+printf "%s\n\nDone! Press [Return] to exit."
+read -p ".."
+rem
+exit
+exit
+}
+
+
+
+########
+#STEAM
+########
+
+
+function steampow () {
+$c
+read -p "Install Steam properly? [y/n]:" c
+
+#0) PART 1:
+#1) Clear /etc/apt/sources.list.d/steam.list
+#2) Fill with corrected info
+#3) Download latest steam package and key
+#4) Move key to proper location if download successful
+#5) Check for errors, if none: part 2
+if [ $c == "y" ];
+then
+$c
+$x "%s#steam\ndeb [arch=amd64,i386] http://repo.steampowered.com/steam/ stable steam" > /etc/apt/sources.list.d/steam.list
+wget https://repo.steampowered.com/steam/archive/stable/steam_latest.deb
+wget https://repo.steampowered.com/steam/archive/stable/steam.gpg
+
+FILE=steam.gpg
+if [ -f "$FILE" ];
+then
+#2
+mv -f steam.gpg /etc/apt/trusted.gpg.d/steam.gpg
+fi
+
+read -p "Any errors? [y/n]:" d
+if [ $d == "y" ];
+#
+then
+$c
+printf "Sorry about that. Skipping."
+read -p ".."
+oneoneseven
+else
+#0) PART 2:
+#1) Extract downloaded package
+#2) Retrieve steam from repo
+#3) Create external script that runs steam @ user level
+#4) Change permissions so it can be executed
+#5) Execute it
+#6) Install package containing libGL.so.1
+
+$c
+read -p "Great! Onto part two. Choose 'N' if prompted..."
+$c
+dpkg -i steam_latest.deb
+apt update -y
+apt upgrade -y
+apt install zenity zenity-common steam-launcher -y
+printf "%s\n\n"
+read -p "First installation phase complete! Onto phase two..."
+$c
+#write a.sh
+$x "%s#!/bin/bash\nsteam\nread -p \"...\"\n" > a.sh
+##chg permission
+chmod 740 a.sh
+chmod +x a.sh
+chown $SUDO_USER a.sh
+#run a.sh as user (not root)
+su -c ./a.sh $SUDO_USER
+apt install libgl1-nvidia-glvnd-glx:i386 -y
+printf "%s\n\nSteam has been installed successfully.\n"
+read -p "Press [Return] to continue..."
+oneoneseven
+fi
+oneoneseven
+fi
+
+}
+
+
+
+###########################
+#NVIDIA DRIVERS AND TOOLS
+###########################
+
+
+#ask if nvidia drivers wanted
+$c
+read -p "Install the  nvidia drivers and tools? [y/n]:" a
+if [ $a == "y" ];
+then
+$c
+apt install nvidia-driver nvidia-cuda-toolkit hashcat-nvidia clinfo debtags menu beignet-opencl-icd mesa-opencl-icd nvidia-cuda-mps libvdpau-doc nodejs opencl-clhpp-headers-doc -y
+printf "%s\n\n"
+read -p "Any errors or warnings? [y/n]:" b 
+if [ $b == "y" ];
+then
+printf "%sSorry about that!\nPress [Return] to reverse the install."
+read -p ".."
+apt remove nvidia-driver nvidia-cuda-toolkit hashcat-nvidia clinfo debtags menu beignet-opencl-icd mesa-opencl-icd nvidia-cuda-mps libvdpau-doc nodejs opencl-clhpp-headers-doc -y
+$c
+steampow
+else
+$c
+printf "Great! Onto part two."
+read -p ".."
+$c
+apt remove mesa-opencl-icd -y
+apt install mesa-utils -y
+printf "%s\n\nDrivers installed. Press [Return] to continue."
+read -p ".."
+steampow
+fi
+steampow
+fi
+
+rem () {
+rm a.sh
+$c
+}
+
+
+
+
+
+#####################
+#STEAM MONSTROSITY
+#####################
+
+
+
+
+
+
+$c
+read -p "ProtonVPN [y/n]:" e
+if [ $e == "y" ];
+then
+upz
+$c
+wget https://protonvpn.com/download/protonvpn-stable-release_1.0.1-1_all.deb
+$r
+$c
+dpkg -i protonvpn-stable-release_1.0.1-1_all.deb
+$r
+$c
+upz
+$c
+apt install protonvpn -y
+$r
+$c
+apt install protonvpn-cli protonvpn-gui protonvpn-stable-release -y
+$r
+$c
+leev
+fi
+
+$c
+read -p "PeaZip [y/n]:" g
+if [ $g == "y" ];
+then
+upz
+wget "https://github.com/peazip/PeaZip/releases/download/8.1.0/peazip_8.1.0.LINUX.x86_64.Qt5.deb"
+$r
+$c
+dpkg -i peazip_8.1.0.LINUX.x86_64.Qt5.deb
+$r
+$c
+upz
+$c
+leev
+fi
+
+
+
+############
+#wrap-up
+############
+
+
+$c
+read -p "VMware [y/n]:" vmw
+if [ $vmw == "y" ];
+then
+upz
+#make b.sh 
+printf "firefox --private-window https://customerconnect.vmware.com/downloads/details?downloadGroup=WKST-PLAYER-1612&productId=1039&rPId=66621#product_downloads" > b.sh
+
+##chg permission
+chmod 740 b.sh
+chmod +x b.sh
+chown $SUDO_USER b.sh
+
+#run as user
+su -c ./b.sh $SUDO_USER
+
+read -p "Download VMware Player, then press [Return]..."
+$c
+leev
+fi
+
+read -p "ProtonVPN [y/n]:" e
+
+#install prerequisites
+$c
+upz
+apt install build-essential linux-headers-generic install  -y 
+$r
+$c
+
+#remove temp files
+apt autoremove -y
+rm *.deb a.sh b.sh
+$r
+$c
+
+#update boot
+update-grub
+$r
+$c
+
+#done
+read -p "Finished! Press [Return] to reboot..."
+systemctl reboot
